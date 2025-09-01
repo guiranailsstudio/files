@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda tu Cita | Guira Nails Studio</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* === NUEVA PALETA DE COLORES ALEGRES === */
+            --primary-color: #FF6B6B;   /* Coral Vibrante */
+            --secondary-color: #FFE66D; /* Amarillo Pálido Sol */
+            --text-color: #2C3E50;      /* Azul Oscuro Pizarra */
+            --bg-color: #F7FFF7;        /* Blanco Menta Fresco */
+            --white-color: #FFFFFF;
+            --light-gray: #E8E8E8;      /* Gris Neutral Claro */
+            --error-color: #c0392b;
+            --font-title: 'Cormorant Garamond', serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+        body {
+            font-family: var(--font-body); margin: 0; background-color: var(--bg-color); color: var(--text-color);
+            display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 20px;
+        }
+        .container {
+            width: 100%; max-width: 900px; background: var(--white-color); border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .content-padding { padding: 30px 40px 50px; }
+        .step-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 40px;
+            background-color: #fdfdfd; border-bottom: 1px solid var(--light-gray);
+        }
+        .header-logo { font-family: var(--font-title); font-size: 1.8em; font-weight: 700; color: var(--text-color); text-decoration: none; }
+        .btn-back {
+            background: transparent; border: none; color: var(--text-color); font-size: 1em; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: color 0.3s ease; text-decoration: none;
+        }
+        .btn-back:hover { color: var(--primary-color); }
+        .btn-back .arrow { font-size: 1.5em; line-height: 1; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        h1, h2 { font-family: var(--font-title); color: var(--text-color); text-align: center; }
+        h1 { font-size: 3em; margin-bottom: 10px; }
+        h2 { font-size: 2.2em; margin-bottom: 30px; border-bottom: 2px solid var(--light-gray); padding-bottom: 15px; }
+        h3 { font-family: var(--font-title); font-weight: 700; color: var(--primary-color); }
+        .welcome-screen { text-align: center; }
+        .welcome-subtitle { font-size: 1.2em; line-height: 1.6; max-width: 600px; margin: 0 auto 30px auto; }
+        .btn {
+            background: var(--primary-color); color: var(--white-color); padding: 15px 35px; border-radius: 50px;
+            border: none; cursor: pointer; font-size: 1em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s ease; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 7px 20px rgba(255, 107, 107, 0.25); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-group { display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .service-card {
+            background: var(--white-color); border: 2px solid var(--light-gray); border-radius: 15px;
+            text-align: center; transition: all 0.4s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: pointer;
+        }
+        .service-card .service-image { width: 100%; height: 180px; object-fit: cover; border-radius: 13px 13px 0 0; }
+        .service-card .service-info { padding: 20px; }
+        .service-card h3 { margin: 0 0 10px 0; font-size: 1.5em; }
+        .full-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out; }
+        .service-card:hover, .service-card.active { border-color: var(--primary-color); transform: translateY(-5px); box-shadow: 0 8px 25px rgba(255, 107, 107, 0.2); }
+        .service-card.active .full-details, .service-card:hover .full-details { max-height: 500px; }
+        .datetime-container { display: flex; gap: 40px; align-items: flex-start; }
+        #calendar-wrapper, #time-wrapper { flex: 1; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        #month-year { font-family: var(--font-title); font-size: 1.8em; color: var(--text-color); }
+        #time-wrapper h3 { font-size: 1.8em; text-align: center; margin-bottom: 15px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .calendar-weekday, .calendar-day { text-align: center; padding: 12px 5px; border-radius: 50%; }
+        .calendar-weekday { font-weight: 600; color: var(--primary-color); }
+        .calendar-day { cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; }
+        .calendar-day:not(.disabled):not(.selected):hover { background-color: var(--secondary-color); }
+        .calendar-day.selected { background-color: var(--primary-color); color: var(--white-color); font-weight: bold; border-color: var(--primary-color); transform: scale(1.1); }
+        .calendar-day.disabled { color: #ccc; cursor: not-allowed; text-decoration: line-through; }
+        #time-blocks-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; }
+        .time-block { background-color: transparent; border: 2px solid var(--light-gray); padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.2s ease; }
+        .time-block:hover { border-color: var(--primary-color); }
+        .time-block.selected { background-color: var(--primary-color); color: var(--white-color); border-color: var(--primary-color); }
+        .time-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; gap: 15px; }
+        #reservation-summary { background-color: #fdfdfd; padding: 15px 25px; border-radius: 10px; margin-bottom: 30px; text-align: center; font-size: 1.1em; font-weight: 600; border-left: 5px solid var(--primary-color); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group input { width: 100%; padding: 12px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 1em; font-family: var(--font-body); box-sizing: border-box; }
+        .form-group input:focus { border-color: var(--primary-color); outline: none; }
+        .terms-group { display: flex; align-items: center; justify-content: center; margin-top: 15px; }
+        .confirmation-screen { text-align: center; padding: 40px 0; }
+        #booking-id { background-color: var(--primary-color); color: var(--white-color); padding: 10px 25px; border-radius: 50px; display: inline-block; font-size: 1.5em; font-weight: 600; margin: 20px 0; }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center; }
+        .spinner { border: 8px solid var(--light-gray); border-top: 8px solid var(--primary-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .container { border-radius: 0; min-height: 100vh; }
+            .content-padding { padding: 20px; }
+            .header-logo { font-size: 1.5em; }
+            h1 { font-size: 2.2em; }
+            h2 { font-size: 1.6em; }
+            .services-grid { grid-template-columns: 1fr; }
+            .datetime-container { flex-direction: column; align-items: center; gap: 30px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- El resto del HTML (body) permanece exactamente igual, solo los estilos del head cambian -->
+
+<div id="loader"><div class="spinner"></div></div>
+<div class="container">
+    <!-- PASO 1: Bienvenida -->
+    <div id="step-1" class="step">
+        <div class="content-padding">
+            <div class="welcome-screen">
+                <h1>Guira Nails Studio</h1>
+                <p class="welcome-subtitle">Bienvenida a tu espacio de belleza. Aquí comienza la transformación de tus uñas. ¿Estás lista?</p>
+                <button class="btn" onclick="goToStep(2)">Comenzar a Agendar</button>
+            </div>
+        </div>
+    </div>
+    <!-- PASO 2: Selección de Servicios -->
+    <div id="step-2" class="step">
+        <div class="step-header">
+            <a href="#" class="header-logo" onclick="goToStep(1, true); event.preventDefault();">Guira Nails Studio</a>
+            <a href="#" class="btn-back" onclick="goBack(event)"><span class="arrow">←</span> Volver</a>
+        </div>
+        <div class="content-padding">
+            <h2>Elige tu Servicio</h2>
+            <div id="services-container" class="services-grid"></div>
+        </div>
+    </div>
+    <!-- PASO 3: Agenda Fecha y Hora -->
+    <div id="step-3" class="step">
+         <div class="step-header">
+            <a href="#" class="header-logo" onclick="goToStep(1, true); event.preventDefault();">Guira Nails Studio</a>
+            <a href="#" class="btn-back" onclick="goBack(event)"><span class="arrow">←</span> Volver</a>
+        </div>
+        <div class="content-padding">
+            <h2 id="service-title-for-scheduling">Agendar Servicio</h2>
+            <div class="datetime-container">
+                 <div id="calendar-wrapper">
+                    <div class="calendar-header">
+                        <button id="prev-month" class="btn-back"><span class="arrow">←</span></button>
+                        <h3 id="month-year"></h3>
+                        <button id="next-month" class="btn-back"><span class="arrow">→</span></button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekday">Do</div><div class="calendar-weekday">Lu</div><div class="calendar-weekday">Ma</div><div class="calendar-weekday">Mi</div><div class="calendar-weekday">Ju</div><div class="calendar-weekday">Vi</div><div class="calendar-weekday">Sá</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-days"></div>
+                </div>
+                <div id="time-wrapper">
+                    <h3>Horas Disponibles</h3>
+                    <div id="time-blocks-container"><p>Selecciona un día para ver las horas.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- PASO 4: Completa tus Datos -->
+    <div id="step-4" class="step">
+        <div class="step-header">
+            <a href="#" class="header-logo" onclick="goToStep(1, true); event.preventDefault();">Guira Nails Studio</a>
+            <a href="#" class="btn-back" onclick="goBack(event)"><span class="arrow">←</span> Volver</a>
+        </div>
+        <div class="content-padding">
+            <h2>Completa tus Datos</h2>
+            <div id="reservation-summary"></div>
+            <div class="form-grid">
+                <div class="form-group"><input type="text" id="nombre" required placeholder="Nombre"></div>
+                <div class="form-group"><input type="text" id="apellido" required placeholder="Apellido"></div>
+                <div class="form-group"><input type="email" id="email" required placeholder="Email"></div>
+                <div class="form-group"><input type="tel" id="telefono" required placeholder="Teléfono"></div>
+            </div>
+            <div class="terms-group">
+                <input type="checkbox" id="terms-checkbox">
+                <label for="terms-checkbox">Acepto la política de cancelación (aviso de 24h).</label>
+            </div>
+            <div class="btn-group">
+                 <button class="btn" id="submitBtn">Confirmar Cita</button>
+            </div>
+        </div>
+    </div>
+    <!-- PASO 5: Confirmación -->
+    <div id="step-5" class="step">
+        <div class="step-header">
+            <a href="#" class="header-logo" onclick="goToStep(1, true); event.preventDefault();">Guira Nails Studio</a>
+        </div>
+        <div class="content-padding">
+            <div class="confirmation-screen">
+                <div style="font-size: 5em; color: var(--primary-color);">✓</div>
+                <h1>¡Cita Agendada!</h1>
+                <p>Tu cita ha sido reservada con éxito. Hemos enviado un correo con todos los detalles.</p>
+                <p>Tu código de reserva es:</p>
+                <div id="booking-id"></div>
+                <div class="btn-group">
+                     <button class="btn" onclick="resetApp()">Agendar otra cita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // El script permanece exactamente igual, no necesita cambios.
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCxrism4ZbT60VL1ak-zyJuvd2JQu8Su-rziOGm_OwpL8fdgkpO7LIq7rfxqo4tr6sOw/exec"; // <-- REEMPLAZA ESTA URL POR LA DE TU SCRIPT
+    const SERVICIOS = [
+        { id: 'manicure_rusa_nivelacion', nombre: "Manicure Rusa con Nivelación", activo: true, imagen: "https://images.unsplash.com/photo-1632345031435-8727f669dfcd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Limpieza profunda de cutículas con técnica rusa, más nivelación para corregir imperfecciones y lograr una superficie perfecta.", duracion: 90, precio: "$25.000", diasDisponibles: [1, 2, 3, 4, 5, 6, 0] },
+        { id: 'manicure_rusa_esmaltado', nombre: "Manicure Rusa y Esmaltado", activo: true, imagen: "https://images.unsplash.com/photo-1519415494921-2f254b5a452a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Corte y limpieza precisa con técnica rusa, acompañado de esmaltado permanente de larga duración para un brillo y color por semanas.", duracion: 75, precio: "$22.000", diasDisponibles: [1, 2, 3, 4, 5, 6, 0] },
+        { id: 'acrilicas_moldes', nombre: "Uñas Acrílicas (Moldes)", activo: true, imagen: "https://images.unsplash.com/photo-1522136270452-f12a3c3a72a0?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Esculpidas con moldes profesionales para lograr una forma perfecta, alta resistencia y un diseño totalmente personalizado.", duracion: 180, precio: "$45.000", diasDisponibles: [6, 0] },
+        { id: 'acrilicas_tips', nombre: "Uñas Acrílicas (Tips)", activo: true, imagen: "https://images.unsplash.com/photo-1615881752423-663554a9925e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Extensión rápida y resistente con tips, ideal para transformar el largo y forma de tus uñas con un acabado uniforme y elegante.", duracion: 150, precio: "$40.000", diasDisponibles: [6, 0] },
+        { id: 'polygel_moldes', nombre: "Uñas Polygel (Moldes)", activo: true, imagen: "https://images.unsplash.com/photo-1604335492223-985a53e6d234?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Combinación de resistencia y ligereza, esculpidas con moldes para un ajuste perfecto y un acabado natural y cómodo.", duracion: 180, precio: "$50.000", diasDisponibles: [6, 0] },
+        { id: 'polygel_tips', nombre: "Uñas Polygel (Tips)", activo: true, imagen: "https://plus.unsplash.com/premium_photo-1681489390074-a2122340573e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Extensión ligera y flexible que mantiene la resistencia, con un acabado natural adaptado a tu estilo.", duracion: 150, precio: "$45.000", diasDisponibles: [6, 0] },
+        { id: 'pedicure_estetica', nombre: "Pedicure Estética", activo: true, imagen: "https://images.unsplash.com/photo-1599233009837-142d743a57e3?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Limpieza, limado, cuidado de cutículas, hidratación y esmaltado para que tus pies luzcan suaves, frescos y perfectos.", duracion: 60, precio: "$20.000", diasDisponibles: [1, 2, 3, 4, 5, 6, 0] },
+        { id: 'soft_gel', nombre: "Uñas Soft Gel", activo: true, imagen: "https://images.unsplash.com/photo-1519415494921-2f254b5a452a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=800", descLarga: "Extensiones de gel listas para aplicar que se adhieren a la uña natural, ofreciendo un acabado fino, elegante y ultra natural.", duracion: 90, precio: "$35.000", diasDisponibles: [6, 0] }
+    ];
+    let state = { currentStep: 1, selectedService: null, selectedDate: null, selectedTime: null };
+    let currentDate = new Date();
+    function updateHistory(step) { history.pushState({ step }, `Paso ${step}`, `#step-${step}`); }
+    function goBack(e) { e.preventDefault(); history.back(); }
+    window.onpopstate = e => { goToStep(e.state?.step || 1, false); };
+    function goToStep(step, updateHist = true) {
+        state.currentStep = step;
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        const activeStep = document.getElementById(`step-${step}`);
+        if(activeStep) activeStep.classList.add('active');
+        if (updateHist) updateHistory(step);
+        window.scrollTo(0, 0);
+    }
+    function resetApp() {
+        state = { currentStep: 1, selectedService: null, selectedDate: null, selectedTime: null };
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        goToStep(1, true);
+    }
+    function renderServices() {
+        const container = document.getElementById('services-container');
+        container.innerHTML = SERVICIOS.filter(s => s.activo).map(s => `
+            <div class="service-card" data-service-id="${s.id}">
+                <img src="${s.imagen}" alt="${s.nombre}" class="service-image">
+                <div class="service-info">
+                    <h3>${s.nombre}</h3>
+                    <div class="full-details">
+                        <p>${s.descLarga}</p>
+                        <span class="price-duration">${s.precio} / ${s.duracion} min</span>
+                        <button class="btn" onclick="selectService('${s.id}', event)">Agendar</button>
+                    </div>
+                </div>
+            </div>`).join('');
+        document.querySelectorAll('.service-card').forEach(c => {
+            c.addEventListener('click', e => {
+                if (e.target.tagName === 'BUTTON') return;
+                if (c.classList.contains('active')) c.classList.remove('active');
+                else {
+                    document.querySelectorAll('.service-card.active').forEach(ac => ac.classList.remove('active'));
+                    c.classList.add('active');
+                }
+            });
+        });
+    }
+    function selectService(id, event) {
+        event.stopPropagation();
+        state.selectedService = SERVICIOS.find(s => s.id === id);
+        document.getElementById('service-title-for-scheduling').textContent = `Agendar: ${state.selectedService.nombre}`;
+        state.selectedDate = null;
+        state.selectedTime = null;
+        renderCalendar();
+        document.getElementById('time-blocks-container').innerHTML = '<p>Selecciona un día para ver las horas.</p>';
+        goToStep(3);
+    }
+    function renderCalendar() {
+        const calDays = document.getElementById('calendar-days');
+        calDays.innerHTML = '';
+        const month = currentDate.getMonth(), year = currentDate.getFullYear();
+        document.getElementById('month-year').textContent = new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        for (let i = 0; i < firstDay; i++) calDays.innerHTML += '<div></div>';
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayDate = new Date(year, month, i);
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            dayEl.textContent = i;
+            const dateStr = dayDate.toISOString().split('T')[0];
+            if (dayDate < today || !state.selectedService.diasDisponibles.includes(dayDate.getDay())) {
+                dayEl.classList.add('disabled');
+            } else {
+                dayEl.dataset.date = dateStr;
+                dayEl.onclick = () => selectDate(dateStr);
+            }
+            if(dateStr === state.selectedDate) dayEl.classList.add('selected');
+            calDays.appendChild(dayEl);
+        }
+    }
+    function selectDate(dateStr) {
+        state.selectedDate = dateStr;
+        renderCalendar();
+        if (window.innerWidth <= 768) {
+            document.getElementById('time-wrapper').scrollIntoView({ behavior: 'smooth' });
+        }
+        fetchAvailableTimes();
+    }
+    async function fetchAvailableTimes() {
+        const timeContainer = document.getElementById('time-blocks-container');
+        timeContainer.innerHTML = `<div class="time-loader"><div class="spinner"></div><p>Buscando horas...</p></div>`;
+        try {
+            const url = `${SCRIPT_URL}?action=getAvailability&serviceId=${state.selectedService.id}&date=${state.selectedDate}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error de red.');
+            const result = await response.json();
+            if (result.success) renderTimeBlocks(result.data);
+            else throw new Error(result.error);
+        } catch (error) {
+            timeContainer.innerHTML = `<p style="color: var(--error-color);">${error.message}</p>`;
+        }
+    }
+    function renderTimeBlocks(times) {
+        const container = document.getElementById('time-blocks-container');
+        if (times.length === 0) {
+            container.innerHTML = '<p>No hay horas disponibles para este día.</p>';
+            return;
+        }
+        container.innerHTML = times.map(t => `<button class="time-block" onclick="selectTime('${t}', this)">${t}</button>`).join('');
+    }
+    function selectTime(time, el) {
+        state.selectedTime = time;
+        document.querySelectorAll('.time-block.selected').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        prepareForm();
+    }
+    function prepareForm() {
+        const fecha = new Date(`${state.selectedDate}T${state.selectedTime}`).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+        document.getElementById('reservation-summary').innerHTML = `<strong>Servicio:</strong> ${state.selectedService.nombre}<br><strong>Fecha:</strong> ${fecha} a las ${state.selectedTime} hrs.`;
+        goToStep(4);
+    }
+    async function submitBooking() {
+        if (!document.getElementById('terms-checkbox').checked) {
+            alert('Debes aceptar la política de cancelación.'); return;
+        }
+        document.getElementById('loader').style.display = 'flex';
+        const bookingData = {
+            action: 'createBooking', serviceId: state.selectedService.id, serviceName: state.selectedService.nombre,
+            duration: state.selectedService.duracion, date: state.selectedDate, time: state.selectedTime,
+            client: {
+                nombre: document.getElementById('nombre').value.trim(),
+                apellido: document.getElementById('apellido').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(),
+            }
+        };
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', mode: 'cors', body: JSON.stringify(bookingData) });
+            const result = await res.json();
+            if (result.success) {
+                document.getElementById('booking-id').textContent = result.data.bookingId;
+                goToStep(5);
+            } else throw new Error(result.error);
+        } catch (error) {
+            alert(`No se pudo completar la reserva: ${error.message}`);
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialStep = window.location.hash ? parseInt(window.location.hash.replace('#step-', '')) || 1 : 1;
+        goToStep(initialStep, false);
+        history.replaceState({ step: initialStep }, `Paso ${initialStep}`, `#step-${initialStep}`);
+        renderServices();
+        document.getElementById('prev-month').onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); };
+        document.getElementById('next-month').onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); };
+        const submitBtn = document.getElementById('submitBtn');
+        const termsCheckbox = document.getElementById('terms-checkbox');
+        submitBtn.disabled = true;
+        termsCheckbox.addEventListener('change', () => { submitBtn.disabled = !termsCheckbox.checked; });
+        submitBtn.addEventListener('click', submitBooking);
+    });
+</script>
+</body>
+</html>
